@@ -1,5 +1,6 @@
 package com.zarb.hero.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -22,6 +23,10 @@ fun ReviewMistakesScreen(
     mistakeStats: List<QuestionStatEntity>,
     onBackHome: () -> Unit
 ) {
+    BackHandler {
+        onBackHome()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -31,12 +36,32 @@ fun ReviewMistakesScreen(
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "جعبه مرور اشتباهات",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Black,
-                color = Color(0xFFE65100)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = onBackHome,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE65100)),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                ) {
+                    Text("← بازگشت", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
+
+                Text(
+                    text = "جعبه مرور اشتباهات",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Black,
+                    color = Color(0xFFE65100)
+                )
+
+                Spacer(modifier = Modifier.width(70.dp))
+            }
+
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "سؤال‌هایی که قبلاً به آن‌ها اشتباه پاسخ داده‌اید:",
@@ -44,7 +69,7 @@ fun ReviewMistakesScreen(
                 color = Color(0xFF5D4037)
             )
 
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             if (mistakeStats.isEmpty()) {
                 Box(
@@ -114,7 +139,7 @@ fun ReviewMistakesScreen(
         }
 
         KidButton(
-            text = "بازگشت به خانه",
+            text = "بازگشت به خانه 🏠",
             onClick = onBackHome,
             containerColor = Color(0xFFFF6F00),
             modifier = Modifier.fillMaxWidth()

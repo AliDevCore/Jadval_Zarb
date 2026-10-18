@@ -1,5 +1,6 @@
 package com.zarb.hero.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -23,113 +24,147 @@ fun ReportScreen(
     bestPercentage: Int,
     onBackHome: () -> Unit
 ) {
+    // جلوگیری از بسته شدن برنامه هنگام زدن دکمه بازگشت فیزیکی گوشی
+    BackHandler {
+        onBackHome()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF9FBE7))
             .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        // نوار بالای صفحه با دکمه بازگشت مستقیم
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(
+                onClick = onBackHome,
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00796B)),
+                shape = RoundedCornerShape(12.dp),
+                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+            ) {
+                Text(
+                    text = "← بازگشت",
+                    color = Color.White,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
             Text(
-                text = "کارنامه آزمون ۲۰ سؤالی",
-                fontSize = 26.sp,
+                text = "کارنامه پایان آزمون",
+                fontSize = 22.sp,
                 fontWeight = FontWeight.Black,
                 color = Color(0xFF33691E)
             )
 
-            Spacer(modifier = Modifier.height(14.dp))
+            // فاصله متقارن برای وسط‌چین شدن عنوان
+            Spacer(modifier = Modifier.width(70.dp))
+        }
 
-            Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-                modifier = Modifier.fillMaxWidth()
+        Spacer(modifier = Modifier.height(4.dp))
+
+        // کادر خلاصه نمره، زمان و زنجیره درست
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Column(
-                    modifier = Modifier.padding(18.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "نمره شما: ${PersianUtils.toPersian(summary.percentage)}٪",
-                        fontSize = 32.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = if (summary.percentage >= 80) Color(0xFF2E7D32) else Color(0xFFEF6C00)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "پاسخ‌های صحیح: ${PersianUtils.toPersian(summary.correctCount)} از ۲۰  |  غلط: ${PersianUtils.toPersian(summary.wrongCount)}",
-                        fontSize = 16.sp,
-                        color = Color.DarkGray
-                    )
-                    Text(
-                        text = "مدت کل آزمون: ${PersianUtils.formatDuration(summary.totalDurationSeconds)}",
-                        fontSize = 15.sp,
-                        color = Color.Gray
-                    )
-                    Text(
-                        text = "بیشترین توالی درست در این آزمون: ${PersianUtils.toPersian(summary.maxStreak)} سؤال",
-                        fontSize = 15.sp,
-                        color = Color(0xFF1565C0)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            if (summary.mistakes.isNotEmpty()) {
                 Text(
-                    text = "سؤال‌هایی که نیاز به یادآوری دارند:",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFFC62828),
-                    modifier = Modifier.align(Alignment.Start)
+                    text = "نمره شما: ${PersianUtils.toPersian(summary.percentage)}٪",
+                    fontSize = 32.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = if (summary.percentage >= 80) Color(0xFF2E7D32) else Color(0xFFEF6C00)
                 )
                 Spacer(modifier = Modifier.height(6.dp))
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    items(summary.mistakes) { mistake ->
-                        Card(
-                            shape = RoundedCornerShape(12.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                Text(
+                    text = "پاسخ‌های صحیح: ${PersianUtils.toPersian(summary.correctCount)} از ۲۰  |  غلط: ${PersianUtils.toPersian(summary.wrongCount)}",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color.DarkGray
+                )
+                Text(
+                    text = "مدت کل آزمون: ${PersianUtils.formatDuration(summary.totalDurationSeconds)}",
+                    fontSize = 14.sp,
+                    color = Color.Gray
+                )
+                Text(
+                    text = "بیشترین توالی درست در این آزمون: ${PersianUtils.toPersian(summary.maxStreak)} سؤال",
+                    fontSize = 14.sp,
+                    color = Color(0xFF1565C0)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // بخش نمایش اشتباهات با وزن‌دهی یکتا برای اشغال فضای میانی
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        ) {
+            if (summary.mistakes.isNotEmpty()) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Text(
+                        text = "سؤال‌هایی که نیاز به مرور دارند:",
+                        fontSize = 15.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFFC62828),
+                        modifier = Modifier.padding(bottom = 6.dp)
+                    )
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        items(summary.mistakes) { mistake ->
+                            Card(
+                                shape = RoundedCornerShape(12.dp),
+                                colors = CardDefaults.cardColors(containerColor = Color.White)
                             ) {
-                                Text(
-                                    text = "${PersianUtils.toPersian(mistake.factorA)} × ${PersianUtils.toPersian(mistake.factorB)}",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = "پاسخ شما: ${PersianUtils.toPersian(mistake.childAnswer)}",
-                                    color = Color.Red,
-                                    fontSize = 15.sp
-                                )
-                                Text(
-                                    text = "درست: ${PersianUtils.toPersian(mistake.correctAnswer)}",
-                                    color = Color(0xFF2E7D32),
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp
-                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(12.dp),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(
+                                        text = "${PersianUtils.toPersian(mistake.factorA)} × ${PersianUtils.toPersian(mistake.factorB)}",
+                                        fontSize = 18.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = "پاسخ شما: ${PersianUtils.toPersian(mistake.childAnswer)}",
+                                        color = Color.Red,
+                                        fontSize = 15.sp
+                                    )
+                                    Text(
+                                        text = "درست: ${PersianUtils.toPersian(mistake.correctAnswer)}",
+                                        color = Color(0xFF2E7D32),
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 15.sp
+                                    )
+                                }
                             }
                         }
                     }
                 }
             } else {
                 Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
+                    modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -142,8 +177,11 @@ fun ReportScreen(
             }
         }
 
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // دکمه بزرگ و همواره ثابت پایین صفحه
         KidButton(
-            text = "بازگشت به صفحه اصلی",
+            text = "بازگشت به صفحه اصلی 🏠",
             onClick = onBackHome,
             containerColor = Color(0xFF00897B),
             modifier = Modifier.fillMaxWidth()

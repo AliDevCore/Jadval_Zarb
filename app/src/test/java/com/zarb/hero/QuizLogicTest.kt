@@ -14,12 +14,24 @@ class QuizLogicTest {
     }
 
     @Test
-    fun testQuestionsWithinRange1To10() {
+    fun testQuestionsWithinRange3To9AndExcludes1_2_10() {
         val questions = AdaptiveQuestionSelector.generate20Questions(emptyMap())
         for (q in questions) {
-            assertTrue("Factor A must be between 1 and 10", q.factorA in 1..10)
-            assertTrue("Factor B must be between 1 and 10", q.factorB in 1..10)
+            assertTrue("Factor A must be between 3 and 9", q.factorA in 3..9)
+            assertTrue("Factor B must be between 3 and 9", q.factorB in 3..9)
+            assertNotEquals("Factor A must not be 1", 1, q.factorA)
+            assertNotEquals("Factor A must not be 2", 2, q.factorA)
+            assertNotEquals("Factor A must not be 10", 10, q.factorA)
+            assertNotEquals("Factor B must not be 1", 1, q.factorB)
+            assertNotEquals("Factor B must not be 2", 2, q.factorB)
+            assertNotEquals("Factor B must not be 10", 10, q.factorB)
         }
+    }
+
+    @Test
+    fun testCanonicalPairsCountIs28() {
+        val pairs = AdaptiveQuestionSelector.getAllCanonicalPairs()
+        assertEquals("Canonical pairs for 3..9 must be exactly 28", 28, pairs.size)
     }
 
     @Test
@@ -58,10 +70,10 @@ class QuizLogicTest {
             wrongCount = 5,
             lastWasWrong = true
         )
-        stats["2x2"] = QuestionStatEntity(
-            canonicalKey = "2x2",
-            factorA = 2,
-            factorB = 2,
+        stats["3x3"] = QuestionStatEntity(
+            canonicalKey = "3x3",
+            factorA = 3,
+            factorB = 3,
             totalAsked = 10,
             correctCount = 10,
             wrongCount = 0,
@@ -69,7 +81,7 @@ class QuizLogicTest {
         )
 
         val weightHard = AdaptiveQuestionSelector.calculateWeight(stats["7x8"])
-        val weightEasy = AdaptiveQuestionSelector.calculateWeight(stats["2x2"])
+        val weightEasy = AdaptiveQuestionSelector.calculateWeight(stats["3x3"])
 
         assertTrue("Error question must have significantly higher weight", weightHard > weightEasy * 3.0)
         assertTrue("Mastered question must not have 0 weight", weightEasy >= 1.5)

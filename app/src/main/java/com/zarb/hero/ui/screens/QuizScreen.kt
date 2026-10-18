@@ -1,6 +1,7 @@
 package com.zarb.hero.ui.screens
 
 import android.os.SystemClock
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.background
@@ -28,6 +29,11 @@ fun QuizScreen(
     onNextQuestion: () -> Unit,
     onExitQuiz: () -> Unit
 ) {
+    // بازگشت با دکمه سخت‌افزاری یا ژست گوشی بدون بستن اپ
+    BackHandler {
+        onExitQuiz()
+    }
+
     var inputStr by remember(state.currentIndex) { mutableStateOf("") }
     var questionStartTime by remember(state.currentIndex) { mutableStateOf(SystemClock.elapsedRealtime()) }
 
@@ -50,7 +56,7 @@ fun QuizScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 TextButton(onClick = onExitQuiz) {
-                    Text("خروج", color = Color.Gray, fontSize = 16.sp)
+                    Text("خروج ✕", color = Color(0xFFD32F2F), fontSize = 16.sp, fontWeight = FontWeight.Bold)
                 }
                 Text(
                     text = "سؤال ${PersianUtils.toPersian(state.currentIndex + 1)} از ${PersianUtils.toPersian(state.questions.size)}",
@@ -141,7 +147,7 @@ fun QuizScreen(
                         text = if (state.currentIndex == 19) "مشاهده کارنامه پایانی" else "سؤال بعدی ⬅",
                         onClick = onNextQuestion,
                         containerColor = if (isCorrect) Color(0xFF4CAF50) else Color(0xFFFF9800),
-                        modifier = Modifier.fillMaxWidth(0.8f)
+                        modifier = Modifier.fillMaxWidth(0.85f)
                     )
                 }
             }

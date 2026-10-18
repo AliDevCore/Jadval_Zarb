@@ -6,14 +6,15 @@ import kotlin.random.Random
 
 object AdaptiveQuestionSelector {
 
+    // تولید کل ۲۸ عبارت متمایز جدول ضرب اعداد ۳ تا ۹ (حذف ضرایب خیلی ساده ۱، ۲ و ۱۰)
     fun getAllCanonicalPairs(): List<Pair<Int, Int>> {
         val pairs = mutableListOf<Pair<Int, Int>>()
-        for (i in 1..10) {
-            for (j in i..10) {
+        for (i in 3..9) {
+            for (j in i..9) {
                 pairs.add(Pair(i, j))
             }
         }
-        return pairs
+        return pairs // دقیقاً ۲۸ جفت یکتا
     }
 
     fun calculateWeight(stat: QuestionStatEntity?): Double {
@@ -29,6 +30,7 @@ object AdaptiveQuestionSelector {
         return computed.coerceAtLeast(1.5)
     }
 
+    // انتخاب دقیقاً ۲۰ سؤال بدون تکرار از بین ۲۸ جفت معتبر جدول ضرب ۳ تا ۹
     fun generate20Questions(stats: Map<String, QuestionStatEntity>, random: Random = Random.Default): List<Question> {
         val allPairs = getAllCanonicalPairs()
         val pool = allPairs.toMutableList()

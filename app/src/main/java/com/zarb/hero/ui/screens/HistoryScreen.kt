@@ -1,5 +1,6 @@
 package com.zarb.hero.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +25,10 @@ fun HistoryScreen(
     tableStats: List<TableMastery>,
     onBackHome: () -> Unit
 ) {
+    BackHandler {
+        onBackHome()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -33,14 +38,33 @@ fun HistoryScreen(
         verticalArrangement = Arrangement.SpaceBetween
     ) {
         Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = "تحلیل تسلط جدول‌های ضرب (۱ تا ۱۰)",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color(0xFF1B5E20)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Button(
+                    onClick = onBackHome,
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00796B)),
+                    shape = RoundedCornerShape(12.dp),
+                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
+                ) {
+                    Text("← بازگشت", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
+                }
 
-            Spacer(modifier = Modifier.height(10.dp))
+                Text(
+                    text = "تحلیل تسلط جدول‌های ضرب (۳ تا ۹)",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1B5E20)
+                )
+
+                Spacer(modifier = Modifier.width(70.dp))
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
 
             LazyColumn(
                 modifier = Modifier
@@ -140,7 +164,7 @@ fun HistoryScreen(
         Spacer(modifier = Modifier.height(10.dp))
 
         KidButton(
-            text = "بازگشت",
+            text = "بازگشت به خانه 🏠",
             onClick = onBackHome,
             containerColor = Color(0xFF00796B),
             modifier = Modifier.fillMaxWidth()

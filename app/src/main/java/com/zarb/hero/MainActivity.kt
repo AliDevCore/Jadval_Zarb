@@ -256,7 +256,8 @@ class MainActivity : ComponentActivity() {
                                     allQuestions.addAll(db.quizDao().getQuestionsForQuiz(quiz.quizId))
                                 }
 
-                                val list = (1..10).map { num ->
+                                // جداول ۳ تا ۹
+                                val list = (3..9).map { num ->
                                     val relevant = allQuestions.filter { it.factorA == num || it.factorB == num }
                                     val total = relevant.size
                                     val correct = relevant.count { it.isCorrect }

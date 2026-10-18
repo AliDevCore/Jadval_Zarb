@@ -49,3 +49,10 @@ data class TableMastery(
     val percentage: Int,
     val statusText: String
 )
+
+data class DailyUsageReport(
+    val dateGregorian: String,
+    val quizCount: Int,
+    val correctCount: Int,
+    val wrongCount: Int
+)

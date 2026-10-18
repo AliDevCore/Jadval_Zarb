@@ -35,41 +35,23 @@ fun ReviewMistakesScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Button(
-                    onClick = onBackHome,
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE65100)),
-                    shape = RoundedCornerShape(12.dp),
-                    contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
-                ) {
-                    Text("← بازگشت", color = Color.White, fontSize = 15.sp, fontWeight = FontWeight.Bold)
-                }
+        Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+            // عنوان متمرکز بدون دکمه بالای صفحه
+            Text(
+                text = "جعبه مرور اشتباهات",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Black,
+                color = Color(0xFFE65100),
+                modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
+            )
 
-                Text(
-                    text = "جعبه مرور اشتباهات",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Black,
-                    color = Color(0xFFE65100)
-                )
-
-                Spacer(modifier = Modifier.width(70.dp))
-            }
-
-            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = "سؤال‌هایی که قبلاً به آن‌ها اشتباه پاسخ داده‌اید:",
                 fontSize = 14.sp,
                 color = Color(0xFF5D4037)
             )
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             if (mistakeStats.isEmpty()) {
                 Box(
@@ -138,6 +120,7 @@ fun ReviewMistakesScreen(
             }
         }
 
+        // تنها دکمه بازگشت در پایین صفحه
         KidButton(
             text = "بازگشت به خانه 🏠",
             onClick = onBackHome,

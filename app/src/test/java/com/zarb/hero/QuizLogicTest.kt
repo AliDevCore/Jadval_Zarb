@@ -1,9 +1,14 @@
 package com.zarb.hero
 
 import com.zarb.hero.data.local.QuestionStatEntity
+import com.zarb.hero.data.local.QuizEntity
 import com.zarb.hero.engine.AdaptiveQuestionSelector
+import com.zarb.hero.model.DailyUsageReport
 import org.junit.Assert.*
 import org.junit.Test
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class QuizLogicTest {
 
@@ -85,5 +90,36 @@ class QuizLogicTest {
 
         assertTrue("Error question must have significantly higher weight", weightHard > weightEasy * 3.0)
         assertTrue("Mastered question must not have 0 weight", weightEasy >= 1.5)
+    }
+
+    @Test
+    fun testDailyUsageReportAggregation() {
+        val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+        val today = System.currentTimeMillis()
+        val yesterday = today - 86400000L
+
+        val mockQuizzes = listOf(
+            QuizEntity(quizId = 1L, timestamp = today, correctCount = 18, wrongCount = 2, percentage = 90, durationSeconds = 50, maxStreak = 8, isCompleted = true),
+            QuizEntity(quizId = 2L, timestamp = today, correctCount = 15, wrongCount = 5, percentage = 75, durationSeconds = 60, maxStreak = 5, isCompleted = true),
+            QuizEntity(quizId = 3L, timestamp = yesterday, correctCount = 20, wrongCount = 0, percentage = 100, durationSeconds = 40, maxStreak = 20, isCompleted = true)
+        )
+
+        val dailyReports = mockQuizzes
+            .groupBy { sdf.format(Date(it.timestamp)) }
+            .map { (dateStr, list) ->
+                DailyUsageReport(
+                    dateGregorian = dateStr,
+                    quizCount = list.size,
+                    correctCount = list.sumOf { it.correctCount },
+                    wrongCount = list.sumOf { it.wrongCount }
+                )
+            }
+            .sortedByDescending { it.dateGregorian }
+
+        assertEquals(2, dailyReports.size)
+        val todayReport = dailyReports.first { it.dateGregorian == sdf.format(Date(today)) }
+        assertEquals(2, todayReport.quizCount)
+        assertEquals(33, todayReport.correctCount)
+        assertEquals(7, todayReport.wrongCount)
     }
 }

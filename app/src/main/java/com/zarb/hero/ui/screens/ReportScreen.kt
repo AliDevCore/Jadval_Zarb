@@ -24,7 +24,7 @@ fun ReportScreen(
     bestPercentage: Int,
     onBackHome: () -> Unit
 ) {
-    // جلوگیری از بسته شدن برنامه هنگام زدن دکمه بازگشت فیزیکی گوشی
+    // بازگشت با دکمه سخت‌افزاری یا ژست گوشی به صفحه اصلی
     BackHandler {
         onBackHome()
     }
@@ -36,40 +36,14 @@ fun ReportScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // نوار بالای صفحه با دکمه بازگشت مستقیم
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(
-                onClick = onBackHome,
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00796B)),
-                shape = RoundedCornerShape(12.dp),
-                contentPadding = PaddingValues(horizontal = 14.dp, vertical = 6.dp)
-            ) {
-                Text(
-                    text = "← بازگشت",
-                    color = Color.White,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-
-            Text(
-                text = "کارنامه پایان آزمون",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Black,
-                color = Color(0xFF33691E)
-            )
-
-            // فاصله متقارن برای وسط‌چین شدن عنوان
-            Spacer(modifier = Modifier.width(70.dp))
-        }
-
-        Spacer(modifier = Modifier.height(4.dp))
+        // عنوان صفحه کارنامه - بدون دکمه اضافه در بالا
+        Text(
+            text = "کارنامه پایان آزمون",
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Black,
+            color = Color(0xFF33691E),
+            modifier = Modifier.padding(top = 4.dp, bottom = 12.dp)
+        )
 
         // کادر خلاصه نمره، زمان و زنجیره درست
         Card(
@@ -110,7 +84,7 @@ fun ReportScreen(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // بخش نمایش اشتباهات با وزن‌دهی یکتا برای اشغال فضای میانی
+        // بخش نمایش اشتباهات
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -179,7 +153,7 @@ fun ReportScreen(
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // دکمه بزرگ و همواره ثابت پایین صفحه
+        // تنها دکمه بازگشت در پایین صفحه
         KidButton(
             text = "بازگشت به صفحه اصلی 🏠",
             onClick = onBackHome,

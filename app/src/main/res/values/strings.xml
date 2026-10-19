@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">قهرمان جدول ضرب</string>
+    <string name="start_quiz">شروع آزمون جدید</string>
+    <string name="resume_quiz">ادامه آزمون نیمه‌تمام</string>
+    <string name="history_reports">کارنامه و سوابق</string>
+    <string name="review_mistakes">مرور اشتباهات</string>
+    <string name="sound_on">صدا: روشن</string>
+    <string name="sound_off">صدا: خاموش</string>
+</resources>

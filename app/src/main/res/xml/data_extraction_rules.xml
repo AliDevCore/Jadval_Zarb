@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12 و بالاتر:
+     - پشتیبان ابری: سوابق ذخیره نمی‌شود (حریم خصوصی)
+     - انتقال مستقیم گوشی به گوشی: سوابق منتقل می‌شود -->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude domain="database" path="." />
+        <exclude domain="sharedpref" path="." />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="database" path="." />
+        <include domain="sharedpref" path="." />
+    </device-transfer>
+</data-extraction-rules>

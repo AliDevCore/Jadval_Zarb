@@ -41,20 +41,21 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug --stacktrace
 
-      - name: Verify APK Generated
+      - name: Verify and Rename APK
         run: |
           if [ ! -f "app/build/outputs/apk/debug/app-debug.apk" ]; then
             echo "ERROR: app-debug.apk was not found!"
             exit 1
           fi
-          echo "APK successfully built at app/build/outputs/apk/debug/app-debug.apk"
-          ls -lh app/build/outputs/apk/debug/app-debug.apk
+          cp app/build/outputs/apk/debug/app-debug.apk app/build/outputs/apk/debug/Jadval_Zarb.apk
+          echo "APK successfully built and renamed to Jadval_Zarb.apk"
+          ls -lh app/build/outputs/apk/debug/Jadval_Zarb.apk
 
       - name: Upload Debug APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: zarb-hero-debug-apk
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: Jadval_Zarb-apk
+          path: app/build/outputs/apk/debug/Jadval_Zarb.apk
           retention-days: 14
 
       - name: Upload Unit Test Results
@@ -69,7 +70,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: app/build/outputs/apk/debug/app-debug.apk
+          files: app/build/outputs/apk/debug/Jadval_Zarb.apk
           name: "نسخه ${{ github.ref_name }}"
           tag_name: ${{ github.ref_name }}
           generate_release_notes: true

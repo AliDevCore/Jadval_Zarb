@@ -1,26 +1,26 @@
 # قهرمان جدول ضرب (Zarb Hero)
 
 اپلیکیشن جامع، آفلاین و اختصاصی آموزش و سنجش جدول ضرب، طراحی‌شده ویژه کودکان ۹ تا ۱۲ سال به زبان فارسی با رابط کاربری راست‌چین (RTL) و اعداد تمام‌فارسی.
-<table align="center">
-  <tr>
-    <td align="center">
+<table align="center" border="0" cellspacing="0" cellpadding="4" style="border-collapse: collapse; border: none;">
+  <tr style="border: none;">
+    <td align="center" style="border: none;">
       <a href="https://github.com/user-attachments/assets/5991ca80-be27-4b6b-8ab6-c60335bd18cf" target="_blank">
-        <img src="https://github.com/user-attachments/assets/5991ca80-be27-4b6b-8ab6-c60335bd18cf" width="190" alt="تصویر ۱" />
+        <img src="https://github.com/user-attachments/assets/5991ca80-be27-4b6b-8ab6-c60335bd18cf" width="180" style="border: none;" alt="تصویر ۱" />
       </a>
     </td>
-    <td align="center">
+    <td align="center" style="border: none;">
       <a href="https://github.com/user-attachments/assets/cb4ae218-fc2c-4253-bef7-c3c4de1134de" target="_blank">
-        <img src="https://github.com/user-attachments/assets/cb4ae218-fc2c-4253-bef7-c3c4de1134de" width="190" alt="تصویر ۲" />
+        <img src="https://github.com/user-attachments/assets/cb4ae218-fc2c-4253-bef7-c3c4de1134de" width="180" style="border: none;" alt="تصویر ۲" />
       </a>
     </td>
-    <td align="center">
+    <td align="center" style="border: none;">
       <a href="https://github.com/user-attachments/assets/9fe060da-85f8-4457-bc51-f1409771c258" target="_blank">
-        <img src="https://github.com/user-attachments/assets/9fe060da-85f8-4457-bc51-f1409771c258" width="190" alt="تصویر ۳" />
+        <img src="https://github.com/user-attachments/assets/9fe060da-85f8-4457-bc51-f1409771c258" width="180" style="border: none;" alt="تصویر ۳" />
       </a>
     </td>
-    <td align="center">
+    <td align="center" style="border: none;">
       <a href="https://github.com/user-attachments/assets/c933b114-384d-48ff-b0d4-81f486f9ad24" target="_blank">
-        <img src="https://github.com/user-attachments/assets/c933b114-384d-48ff-b0d4-81f486f9ad24" width="190" alt="تصویر ۴" />
+        <img src="https://github.com/user-attachments/assets/c933b114-384d-48ff-b0d4-81f486f9ad24" width="180" style="border: none;" alt="تصویر ۴" />
       </a>
     </td>
   </tr>

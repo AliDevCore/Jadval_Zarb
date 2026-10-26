@@ -8,10 +8,18 @@ on:
   pull_request:
     branches: [ "main", "master" ]
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: 'تگ نسخه (مثال: v1.1.0 - در صورت خالی بودن بر اساس نسخه برنامه و شماره اجرا تعیین می‌شود)'
+        required: false
+        default: ''
+      release_title:
+        description: 'عنوان نسخه در گیت‌هاب (اختیاری)'
+        required: false
+        default: ''
 
-# دسترسی پیش‌فرض فقط‌خواندنی؛ فقط job انتشار اجازه نوشتن دارد
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -19,21 +27,33 @@ concurrency:
 
 jobs:
   build:
-    name: Test & Build Release APK
+    name: Test & Build APKs
     runs-on: ubuntu-latest
+    outputs:
+      version_name: ${{ steps.app_version.outputs.version_name }}
+      version_code: ${{ steps.app_version.outputs.version_code }}
 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
+      - name: Extract App Version
+        id: app_version
+        run: |
+          VERSION_NAME=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
+          VERSION_CODE=$(grep -oP 'versionCode\s*=\s*\K[0-9]+' app/build.gradle.kts)
+          echo "version_name=$VERSION_NAME" >> "$GITHUB_OUTPUT"
+          echo "version_code=$VERSION_CODE" >> "$GITHUB_OUTPUT"
+          echo "Detected App Version: $VERSION_NAME (Code: $VERSION_CODE)"
+
       - name: Verify tag matches versionName
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          VERSION_NAME=$(grep -oP 'versionName\s*=\s*"\K[^"]+' app/build.gradle.kts)
+          VERSION_NAME="${{ steps.app_version.outputs.version_name }}"
           echo "versionName in build.gradle.kts: $VERSION_NAME"
           echo "git tag: $GITHUB_REF_NAME"
-          if [ "v$VERSION_NAME" != "$GITHUB_REF_NAME" ]; then
-            echo "::error::Tag $GITHUB_REF_NAME does not match versionName $VERSION_NAME. Update app/build.gradle.kts (versionName and versionCode) before tagging."
+          if [[ "$GITHUB_REF_NAME" != "v$VERSION_NAME"* ]]; then
+            echo "::error::Tag $GITHUB_REF_NAME does not match versionName $VERSION_NAME. Update app/build.gradle.kts before tagging."
             exit 1
           fi
 
@@ -45,6 +65,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '17'
+          cache: gradle
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
@@ -57,46 +78,64 @@ jobs:
 
       - name: Prepare signing key
         env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 || secrets.RELEASE_KEYSTORE_BASE64 }}
         run: |
           if [ -n "$KEYSTORE_BASE64" ]; then
             echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/zarb-release.keystore"
             echo "KEYSTORE_PATH=$RUNNER_TEMP/zarb-release.keystore" >> "$GITHUB_ENV"
-            echo "Signing key found."
-          elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
-            echo "::error::KEYSTORE_BASE64 secret is missing. A tagged release must be signed with the release key. See RELEASING.md."
+            echo "HAS_KEYSTORE=true" >> "$GITHUB_ENV"
+            echo "Signing key found and configured."
+          elif [[ "$GITHUB_REF" == refs/tags/v* || "$GITHUB_REF" == refs/heads/main || "$GITHUB_REF" == refs/heads/master ]]; then
+            echo "::error::KEYSTORE_BASE64 secret is missing in GitHub Secrets. A release build must be signed with zarb-release.keystore so user data is not wiped on updates. See RELEASING.md."
             exit 1
           else
-            echo "::warning::No signing key. This build is signed with the temporary debug key and must NOT be distributed."
+            echo "HAS_KEYSTORE=false" >> "$GITHUB_ENV"
+            echo "::warning::No signing key found. This PR/dev build will fall back to debug signing."
           fi
 
       - name: Build Release APK
         env:
-          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD || secrets.RELEASE_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS || secrets.RELEASE_KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD || secrets.RELEASE_KEY_PASSWORD }}
         run: ./gradlew assembleRelease --stacktrace
 
-      - name: Verify and Rename APK
+      - name: Build Debug APK
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Verify and Package APKs
         run: |
-          APK=app/build/outputs/apk/release/app-release.apk
-          if [ ! -f "$APK" ]; then
-            echo "ERROR: $APK was not found!"
-            ls -R app/build/outputs/apk || true
+          mkdir -p output_apks
+          RELEASE_APK="app/build/outputs/apk/release/app-release.apk"
+          DEBUG_APK="app/build/outputs/apk/debug/app-debug.apk"
+
+          if [ ! -f "$RELEASE_APK" ]; then
+            echo "ERROR: $RELEASE_APK was not found!"
             exit 1
           fi
-          cp "$APK" Jadval_Zarb.apk
+
+          cp "$RELEASE_APK" output_apks/Jadval_Zarb.apk
+          if [ -f "$DEBUG_APK" ]; then
+            cp "$DEBUG_APK" output_apks/Jadval_Zarb-Debug.apk
+          fi
+
           APKSIGNER=$(ls "$ANDROID_HOME"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -1 || true)
           if [ -n "$APKSIGNER" ]; then
-            "$APKSIGNER" verify --print-certs Jadval_Zarb.apk
+            echo "Verifying Release APK signature:"
+            "$APKSIGNER" verify --print-certs output_apks/Jadval_Zarb.apk
           fi
-          ls -lh Jadval_Zarb.apk
 
-      - name: Upload APK Artifact
+          ls -lh output_apks/
+
+      - name: Clean up Keystore file
+        if: always()
+        run: rm -f "$RUNNER_TEMP/zarb-release.keystore"
+
+      - name: Upload APK Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: Jadval_Zarb-apk
-          path: Jadval_Zarb.apk
+          name: Jadval_Zarb-apks
+          path: output_apks/*.apk
           retention-days: 14
 
       - name: Upload Unit Test Results
@@ -118,25 +157,60 @@ jobs:
   release:
     name: Publish GitHub Release
     needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
+    if: (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch') && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: write
 
     steps:
-      - name: Download APK
+      - name: Download APKs
         uses: actions/download-artifact@v4
         with:
-          name: Jadval_Zarb-apk
+          name: Jadval_Zarb-apks
+          path: release_files
+
+      - name: Determine Release Tag and Title
+        id: release_meta
+        env:
+          INPUT_TAG: ${{ inputs.release_tag }}
+          INPUT_TITLE: ${{ inputs.release_title }}
+          VERSION_NAME: ${{ needs.build.outputs.version_name }}
+          RUN_NUMBER: ${{ github.run_number }}
+        run: |
+          if [ -n "$INPUT_TAG" ]; then
+            TAG="$INPUT_TAG"
+          elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            TAG="$GITHUB_REF_NAME"
+          else
+            TAG="v${VERSION_NAME}.${RUN_NUMBER}"
+          fi
+
+          if [ -n "$INPUT_TITLE" ]; then
+            TITLE="$INPUT_TITLE"
+          elif [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            TITLE="نسخه $GITHUB_REF_NAME"
+          else
+            TITLE="نسخه جدید جدول ضرب ($TAG)"
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "title=$TITLE" >> "$GITHUB_OUTPUT"
+          echo "Release Tag: $TAG"
+          echo "Release Title: $TITLE"
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: Jadval_Zarb.apk
-          name: "نسخه ${{ github.ref_name }}"
-          tag_name: ${{ github.ref_name }}
+          files: release_files/*.apk
+          name: ${{ steps.release_meta.outputs.title }}
+          tag_name: ${{ steps.release_meta.outputs.tag }}
+          body: |
+            ### 🎮 نسخه جدید قهرمان جدول ضرب
+            - **Jadval_Zarb.apk**: نسخه نهایی (Release) امضاشده با کلید اصلی `zarb-release.keystore` (اطلاعات و سوابق قبلی کاربر در هنگام آپدیت حفظ می‌شود).
+            - **Jadval_Zarb-Debug.apk**: نسخه تست و عیب‌یابی (Debug).
           generate_release_notes: true
           draft: false
           prerelease: false
+          make_latest: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

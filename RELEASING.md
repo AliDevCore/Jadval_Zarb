@@ -1,40 +1,49 @@
 # راهنمای انتشار نسخه (Release)
 
-## یک‌بار: ساخت کلید امضا
-این کلید هویت برنامه است. اگر گم شود یا عوض شود، نسخه‌های بعدی روی نسخه نصب‌شده نصب نمی‌شوند. **از آن در جای امن نسخه پشتیبان بگیرید و هرگز در مخزن قرار ندهید.**
+## کلید امضا و حفظ اطلاعات قبلی کاربران
+این برنامه با کلید اختصاصی `zarb-release.keystore` امضا می‌شود.
+> [!IMPORTANT]
+> **این کلید هویت رسمی برنامه روی گوشی کاربران است.**
+> برای اینکه نسخه‌های جدید بدون پاک شدن سوابق، نتایج، آزمون‌های ذخیره‌شده و دیتابیس Room روی نسخه قبلی کاربر نصب شوند (Update):
+> ۱. برنامه باید همیشه با همین کلید اصلی (`zarb-release.keystore`) امضا شود.
+> ۲. شناسه برنامه `com.zarb.hero` باقی بماند.
+> ۳. در هر نسخه جدید، مقدار `versionCode` در `app/build.gradle.kts` حتماً یک عدد بزرگتر از نسخه قبلی باشد.
 
+پوشه کلید در مسیر زیر قرار دارد و در `.gitignore` قرار داده شده تا در گیت کامیت نشود:
+`Jadval Zarb Key/zarb-release.keystore`
+
+---
+
+## متغیرهای Secrets در گیت‌هاب (یک‌بار تنظیم)
+در مسیر ریپازیتوری گیت‌هاب:
+`Settings > Secrets and variables > Actions > Repository secrets`
+
+چهار سکرت زیر در گیت‌هاب تنظیم شده‌اند:
+- `KEYSTORE_BASE64` (یا `RELEASE_KEYSTORE_BASE64`): محتوای فایل `keystore.b64`
+- `KEYSTORE_PASSWORD` (یا `RELEASE_KEYSTORE_PASSWORD`): رمز keystore
+- `KEY_ALIAS` (یا `RELEASE_KEY_ALIAS`): `zarb`
+- `KEY_PASSWORD` (یا `RELEASE_KEY_PASSWORD`): رمز کلید
+
+---
+
+## روش‌های انتشار نسخه جدید در گیت‌هاب
+
+### روش ۱: انتشار خودکار با Push به شاخه main (ساده‌ترین روش - با GitHub Desktop)
+1. در فایل `app/build.gradle.kts`، مقدار `versionCode` را افزایش دهید (مثلاً ۷) و `versionName` را به‌روز کنید (مثلاً `1.1.0`).
+2. در **GitHub Desktop** تغییرات را Commit و سپس `Push origin` کنید.
+3. گیت‌هاب به‌طور خودکار:
+   - تست‌های برنامه را اجرا می‌کند.
+   - هر دو فایل APK (نسخه Release امضاشده با کلید اصلی + نسخه Debug) را کامپایل می‌کند.
+   - امضای APK را اعتبارسنجی می‌کند.
+   - یک Release رسمی جدید در بخش **Releases** گیت‌هاب ایجاد کرده و هر دو فایل را ضمیمه آن می‌کند.
+
+### روش ۲: انتشار دستی با دکمه Run workflow در تب Actions
+1. وارد تب **Actions** ریپازیتوری در گیت‌هاب شوید.
+2. روی گردش‌کار **Build, Test & Release Android APK** کلیک کنید.
+3. دکمه **Run workflow** را بزنید (اختیاری: می‌توانید تگ یا عنوان دلخواه نیز وارد کنید).
+
+### روش ۳: انتشار با تگ گیت
 ```bash
-keytool -genkeypair -v \
-  -keystore zarb-release.keystore \
-  -alias zarb -keyalg RSA -keysize 2048 -validity 10000
+git tag v1.1.0
+git push origin v1.1.0
 ```
-
-سپس فایل را base64 کنید:
-
-```bash
-base64 -w0 zarb-release.keystore > keystore.b64     # لینوکس
-# macOS: base64 -i zarb-release.keystore -o keystore.b64
-```
-
-## یک‌بار: ثبت Secrets در گیت‌هاب
-مسیر: Settings > Secrets and variables > Actions > New repository secret
-
-- `KEYSTORE_BASE64` : محتوای فایل `keystore.b64`
-- `KEYSTORE_PASSWORD` : رمز keystore
-- `KEY_ALIAS` : `zarb` (یا alias انتخابی شما)
-- `KEY_PASSWORD` : رمز کلید
-
-## هر نسخه جدید
-1. در `app/build.gradle.kts` هر دو مقدار را افزایش دهید: `versionCode` (عدد صحیح بزرگ‌تر از قبلی) و `versionName`.
-2. تغییرات را کامیت و push کنید و منتظر سبز شدن CI بمانید.
-3. تگ را دقیقاً هم‌نام `versionName` بزنید:
-   ```bash
-   git tag v1.4.0
-   git push origin v1.4.0
-   ```
-4. CI اگر تگ با `versionName` یکی نباشد یا کلید امضا نباشد، متوقف می‌شود. در حالت موفق، APK امضاشده در Releases منتشر می‌شود.
-
-## نکات
-- شناسه برنامه انتشار `com.zarb.hero` است. نسخه‌های debug قدیمی با شناسه `com.zarb.hero.debug` نصب می‌شدند؛ این دو برنامه جدا هستند و سوابق از نسخه debug به نسخه انتشار منتقل نمی‌شود.
-- بعد از اولین بیلد موفق، artifact با نام `room-schemas` را از Actions دانلود کنید و پوشه `app/schemas/` را در مخزن کامیت کنید (برای نوشتن Migration در آینده).
-- بیلد روی PR یا شاخه main بدون Secrets با کلید موقت debug امضا می‌شود و برای توزیع نیست.

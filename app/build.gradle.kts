@@ -16,8 +16,8 @@ android {
         applicationId = "com.zarb.hero"
         minSdk = 24
         targetSdk = 34
-        versionCode = 6
-        versionName = "1.0"
+        versionCode = 7
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -30,9 +30,9 @@ android {
         if (!keystorePath.isNullOrBlank() && file(keystorePath).exists()) {
             create("release") {
                 storeFile = file(keystorePath)
-                storePassword = System.getenv("KEYSTORE_PASSWORD")
-                keyAlias = System.getenv("KEY_ALIAS")
-                keyPassword = System.getenv("KEY_PASSWORD")
+                storePassword = System.getenv("KEYSTORE_PASSWORD") ?: System.getenv("RELEASE_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KEY_ALIAS") ?: System.getenv("RELEASE_KEY_ALIAS")
+                keyPassword = System.getenv("KEY_PASSWORD") ?: System.getenv("RELEASE_KEY_PASSWORD")
             }
         }
     }
